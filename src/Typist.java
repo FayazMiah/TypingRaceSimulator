@@ -21,6 +21,8 @@ public class Typist
     private int burntOutTurns;
     private double accuracy;
 
+    private boolean mistyped = false;
+
 
     // One of them tracks how far along the passage the typist has reached.
     // Another tracks whether the typist is currently burnt out.
@@ -166,8 +168,7 @@ public class Typist
      * Advances the typist forward by one character along the passage.
      * Should only be called when the typist is not burnt out.
      */
-    public void typeCharacter()
-    {
+    public void typeCharacter() {
         if (!isBurntOut()) {
             this.progress++;
         }
@@ -186,6 +187,8 @@ public class Typist
         } else {
             this.progress -= amount;
         }
+
+        this.setMistyped(true);
     }
 
     /**
@@ -203,6 +206,14 @@ public class Typist
         } else {
             this.accuracy = newAccuracy;
         }
+    }
+
+    public boolean getMistyped() {
+        return this.mistyped;
+    }
+
+    public void setMistyped(boolean a) {
+        this.mistyped = a;
     }
 
     /**
