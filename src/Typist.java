@@ -9,8 +9,8 @@
  * @author (your name)
  * @version (a version number or a date)
  */
-public class Typist
-{
+
+public class Typist {
     // Fields of class Typist
     // Hint: you will need six fields. Think carefully about their types.
 
@@ -21,6 +21,7 @@ public class Typist
     private int burntOutTurns;
     private double accuracy;
 
+    public boolean caffeineGiven = false;
     private boolean mistyped = false;
 
 
@@ -28,9 +29,6 @@ public class Typist
     // Another tracks whether the typist is currently burnt out.
     // A third tracks HOW MANY turns of burnout remain (not just whether they are burnt out).
     // The remaining three should be fairly obvious.
-
-
-
 
     // Constructor of class Typist
     /**
@@ -41,10 +39,10 @@ public class Typist
      * @param typistName    the name of the typist (e.g. "TURBOFINGERS")
      * @param typistAccuracy the typist's accuracy rating, between 0.0 and 1.0
      */
-    public Typist(char typistSymbol, String typistName, double typistAccuracy)
-    {
+    public Typist(char typistSymbol, String typistName, double typistAccuracy) {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
+        this.style = style;
 
         this.progress = 0;
         this.burntOut = false;
@@ -68,6 +66,8 @@ public class Typist
      *
      * @param turns the number of turns the burnout will last
      */
+
+
     public void burnOut(int turns)
     {
         this.burntOut = true;
