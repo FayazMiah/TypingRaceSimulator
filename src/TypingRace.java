@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
@@ -15,6 +16,11 @@ public class TypingRace
     private boolean autocorrect = false;
     private boolean caffeine = false;
     private boolean nightShift = false;
+    public static ArrayList<HashMap<Typist, HashMap<String, Double>>> globalRaceData = new ArrayList<>();
+
+    private static HashMap<Typist, Double> bestWPMs = new HashMap<>();
+
+    private long startUnixTime;
 
 
     public TypingRace(Passage passage, boolean autocorrect, boolean caffeiene, boolean nightShift)
@@ -51,6 +57,10 @@ public class TypingRace
     //starts the race, only when there is atleast 2 players
     public void startRace()
     {
+        this.startUnixTime = System.currentTimeMillis();
+        HashMap<Typist, HashMap<String, Double>> raceData = new HashMap<>();
+
+
         if (typists.size() < 2) {
             System.out.println("Need at least 2 typists to start the race.");
             return;
@@ -59,12 +69,15 @@ public class TypingRace
         boolean finished = false;
         Typist winner = null;
 
-        // reset all typists
+        // reset all typists and check for existing pb
         for (Typist t : typists) {
             t.resetToStart();
-            if (this.nightShift) {
-                t.setAccuracy(t.getAccuracy() * 0.9); // reduce by 10%
+
+            Double wpm = bestWPMs.get(t);
+            if (wpm == null) {
+                bestWPMs.put(t, 0.0);
             }
+
         }
 
         while (!finished) {
@@ -99,13 +112,23 @@ public class TypingRace
             winner.setAccuracy(oldAcc + 0.02);
 
             System.out.println("Final Accuracy: " + winner.getAccuracy() + " (Improved from " + oldAcc + ")");
+            System.out.println("Advance Accuracy %: " + PerformanceMetrics.getAccuracyPercentage(winner));
         }
+
+        for (Typist t : typists) {
+            HashMap<String, Double> data = PerformanceMetrics.createRaceData(t, typists);
+            raceData.put(t, data);
+        }
+        globalRaceData.add(raceData);
+
+        System.out.println(raceData);
+
     }
 
     //advance a given argument typist
     private void advanceTypist(Typist theTypist) {
 
-        double effectiveAccuracy = EffectiveModifiers.calculateEffectiveAccuracy(theTypist, this.caffeine, this.passageLength);
+        double effectiveAccuracy = EffectiveModifiers.calculateEffectiveAccuracy(theTypist, this.caffeine, this.nightShift, this.passageLength);
         double effectiveMistypeChance = EffectiveModifiers.calculateEffectiveMistypeChance(theTypist);
         double effectiveSlideBackMult = EffectiveModifiers.calculateEffectiveSlideBackMult(theTypist, this.autocorrect);
         int extendedBurnoutDuration = EffectiveModifiers.calculateExtendedBurnoutDuration(theTypist);
@@ -130,6 +153,25 @@ public class TypingRace
         if (Math.random() < 0.05 * effectiveAccuracy * effectiveAccuracy) {
             theTypist.burnOut(BURNOUT_DURATION + extendedBurnoutDuration);
         }
+
+        if (theTypist.getProgress() > 2) {
+            Double currentwpm = PerformanceMetrics.getWPM(theTypist, this.startUnixTime);
+            Double highestwpm = bestWPMs.get(theTypist);
+            double raceHighestwpm = theTypist.getRaceBestWPM();
+            if (highestwpm == null || currentwpm > highestwpm) {
+                bestWPMs.put(theTypist, currentwpm);
+            }
+            if (currentwpm > raceHighestwpm) {
+                theTypist.setRaceBestWPM(currentwpm);
+            }
+
+
+
+            //System.out.println("CURRENT HIGH:: " + highestwpm + "CURRENT: " + currentwpm);
+        }
+
+
+
     }
 
     //check for win

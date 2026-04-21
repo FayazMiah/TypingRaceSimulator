@@ -13,6 +13,8 @@ public class EffectiveModifiers {
 
         accuracyMult.put("ENERGYDRINK_EARLY", 1.5);
         accuracyMult.put("ENERGYDRINK_LATE", 0.85);
+
+        accuracyMult.put("NIGHTSHIFT", 0.9);
     }
 
     // modifier that ADDS to the effective accuracy
@@ -90,7 +92,7 @@ public class EffectiveModifiers {
 
 
     // MODIFIER BEHAVIOURS
-    public static double calculateEffectiveAccuracy(Typist theTypist, boolean caffeine, int passageLength) {
+    public static double calculateEffectiveAccuracy(Typist theTypist, boolean caffeine, boolean nightShift, int passageLength) {
         double effectiveAccuracy = theTypist.getAccuracy();
 
         if (caffeine) {
@@ -99,6 +101,10 @@ public class EffectiveModifiers {
             } else {
                 effectiveAccuracy *= accuracyMult.get("CAFFEINE_LATE");
             }
+        }
+
+        if (nightShift) {
+            effectiveAccuracy *= accuracyMult.get("NIGHTSHIFT"); // 10% debuff
         }
 
         String[] accessories = theTypist.getAccessories();

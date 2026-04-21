@@ -28,6 +28,10 @@ public class Typist {
     private String keyboardType;
     private String[] accessories;
     private Color colour;
+    private int numberOfMistypes = 0;
+    private int numberOfProgressions = 0;
+    private int burnoutCount = 0;
+    private double raceBestWPM = 0;
 
 
     // One of them tracks how far along the passage the typist has reached.
@@ -80,6 +84,7 @@ public class Typist {
     {
         this.burntOut = true;
         this.burntOutTurns = turns;
+        this.burnoutCount += 1;
     }
 
     /**
@@ -160,6 +165,10 @@ public class Typist {
         this.progress = 0;
         this.burntOut = false;
         this.burntOutTurns = 0;
+        this.numberOfMistypes = 0;
+        this.numberOfProgressions = 0;
+        this.burnoutCount = 0;
+        this.raceBestWPM = 0;
     }
 
     /**
@@ -179,6 +188,7 @@ public class Typist {
     public void typeCharacter() {
         if (!isBurntOut()) {
             this.progress++;
+            this.numberOfProgressions++;
         }
     }
 
@@ -195,7 +205,7 @@ public class Typist {
         } else {
             this.progress -= amount;
         }
-
+        this.numberOfMistypes += 1;
         this.setMistyped(true);
     }
 
@@ -235,6 +245,26 @@ public class Typist {
     }
     public String[] getAccessories() {
         return this.accessories;
+    }
+
+    public int getNumberOfMistypes(){
+        return this.numberOfMistypes;
+    }
+
+    public int getNumberOfProgressions(){
+        return numberOfProgressions;
+    }
+
+    public int getBurntOutTurns() {
+        return this.burntOutTurns;
+    }
+
+    public double getRaceBestWPM() {
+        return this.raceBestWPM;
+    }
+
+    public void setRaceBestWPM(double wpm) {
+        this.raceBestWPM = wpm;
     }
 
     /**
