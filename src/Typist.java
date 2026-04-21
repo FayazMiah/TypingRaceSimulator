@@ -1,3 +1,5 @@
+import java.awt.*;
+
 /**
  * Write a description of class Typist here.
  *
@@ -20,9 +22,12 @@ public class Typist {
     private boolean burntOut;
     private int burntOutTurns;
     private double accuracy;
-
-    public boolean caffeineGiven = false;
+    private String style;
+    public double effectiveAccuracy; // doesnt require private modification as it does not change behaviour
     private boolean mistyped = false;
+    private String keyboardType;
+    private String[] accessories;
+    private Color colour;
 
 
     // One of them tracks how far along the passage the typist has reached.
@@ -39,10 +44,13 @@ public class Typist {
      * @param typistName    the name of the typist (e.g. "TURBOFINGERS")
      * @param typistAccuracy the typist's accuracy rating, between 0.0 and 1.0
      */
-    public Typist(char typistSymbol, String typistName, double typistAccuracy) {
+    public Typist(char typistSymbol, String typistName, double typistAccuracy, String style, String keyboardType, Color colour, String[] accessories) {
         this.typistSymbol = typistSymbol;
         this.typistName = typistName;
         this.style = style;
+        this.colour = colour;
+        this.accessories = accessories;
+        this.keyboardType = keyboardType;
 
         this.progress = 0;
         this.burntOut = false;
@@ -214,6 +222,19 @@ public class Typist {
 
     public void setMistyped(boolean a) {
         this.mistyped = a;
+    }
+
+    public String getStyle() {return  this.style;}
+    public void setStyle(String style) {this.style = style;}
+
+    public String getKeyboardType() {return  this.keyboardType;}
+    public void setKeyboardType(String keyboardType) {this.keyboardType = keyboardType;}
+
+    public void setAccessories(String[] accessories) {
+        this.accessories = accessories;
+    }
+    public String[] getAccessories() {
+        return this.accessories;
     }
 
     /**

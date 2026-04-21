@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
@@ -30,9 +31,9 @@ public class TypingRace
 
     public static void main(String[] args) {
         TypingRace race = new TypingRace(PassageController.createPassage("short"), false, false, false);
-        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85));
-        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60));
-        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30));
+        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85, "TOUCH_TYPIST", "STENOGRAPHY", new Color(255, 0, 255), new String[]{"ENERGYDRINK"}));
+        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60, "TOUCH_TYPIST", "MEMBRANE", new Color(0, 255, 255),new String[]{"WRISTSUPPORT"}));
+        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30, "HUNT_AND_PECK", "MECHANICAL", new Color(255, 255, 0), new String[]{"NCHEADPHONES"}));
         race.startRace();
     }
 
@@ -104,15 +105,12 @@ public class TypingRace
     //advance a given argument typist
     private void advanceTypist(Typist theTypist) {
 
-        if (this.caffeine && theTypist.getProgress() < 10 && !theTypist.caffeineGiven) {
-            theTypist.setAccuracy(theTypist.getAccuracy() * 1.5);
-            theTypist.caffeineGiven = true;
-        }
+        double effectiveAccuracy = EffectiveModifiers.calculateEffectiveAccuracy(theTypist, this.caffeine, this.passageLength);
+        double effectiveMistypeChance = EffectiveModifiers.calculateEffectiveMistypeChance(theTypist);
+        double effectiveSlideBackMult = EffectiveModifiers.calculateEffectiveSlideBackMult(theTypist, this.autocorrect);
+        int extendedBurnoutDuration = EffectiveModifiers.calculateExtendedBurnoutDuration(theTypist);
 
-        if (this.caffeine && theTypist.getProgress() >= 10 && theTypist.caffeineGiven) {
-            theTypist.setAccuracy(theTypist.getAccuracy() / 1.5 * 0.8);
-            theTypist.caffeineGiven = false;
-        }
+        theTypist.effectiveAccuracy = effectiveAccuracy;
 
         if (theTypist.isBurntOut()) {
             theTypist.recoverFromBurnout();
@@ -120,21 +118,17 @@ public class TypingRace
         }
 
         // successful typing
-        if (Math.random() < theTypist.getAccuracy()) {
+        if (Math.random() < effectiveAccuracy) {
             theTypist.typeCharacter();
         }
         // mistype
-        else if (Math.random() < (1 - theTypist.getAccuracy()) * MISTYPE_BASE_CHANCE) {
-            if (this.autocorrect) {
-                theTypist.slideBack(SLIDE_BACK_AMOUNT/2);
-            } else {
-                theTypist.slideBack(SLIDE_BACK_AMOUNT);
-            }
+        else if (Math.random() < (1 - effectiveAccuracy) * MISTYPE_BASE_CHANCE * effectiveMistypeChance) {
+            theTypist.slideBack((int) Math.round(SLIDE_BACK_AMOUNT * effectiveSlideBackMult));
         }
 
         // burnout
-        if (Math.random() < 0.05 * theTypist.getAccuracy() * theTypist.getAccuracy()) {
-            theTypist.burnOut(BURNOUT_DURATION);
+        if (Math.random() < 0.05 * effectiveAccuracy * effectiveAccuracy) {
+            theTypist.burnOut(BURNOUT_DURATION + extendedBurnoutDuration);
         }
     }
 
@@ -191,11 +185,11 @@ public class TypingRace
         // info display
         if (theTypist.isBurntOut())
         {
-            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.getAccuracy() + ")" + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
+            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.effectiveAccuracy + ")" + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
         }
         else
         {
-            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.getAccuracy() + ")");
+            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.effectiveAccuracy + ")");
         }
     }
 
