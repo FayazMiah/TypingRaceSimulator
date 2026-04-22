@@ -1,7 +1,8 @@
 import java.awt.*;
+import java.util.HashSet;
 
 /**
- * Write a description of class Typist here.
+ * Write a description of class Typist here.//
  *
  * Starter code generously abandoned by Ty Posaurus, your predecessor,
  * who typed with two fingers and considered that "good enough".
@@ -32,6 +33,8 @@ public class Typist {
     private int numberOfProgressions = 0;
     private int burnoutCount = 0;
     private double raceBestWPM = 0;
+
+    private HashSet<Integer> mistypedPositions = new HashSet<>();
 
 
     // One of them tracks how far along the passage the typist has reached.
@@ -169,6 +172,7 @@ public class Typist {
         this.numberOfProgressions = 0;
         this.burnoutCount = 0;
         this.raceBestWPM = 0;
+        this.mistypedPositions = new HashSet<>();
     }
 
     /**
@@ -255,8 +259,8 @@ public class Typist {
         return numberOfProgressions;
     }
 
-    public int getBurntOutTurns() {
-        return this.burntOutTurns;
+    public int getBurnoutCount() {
+        return this.burnoutCount;
     }
 
     public double getRaceBestWPM() {
@@ -265,6 +269,18 @@ public class Typist {
 
     public void setRaceBestWPM(double wpm) {
         this.raceBestWPM = wpm;
+    }
+
+    public Color getColour() {
+        return this.colour;
+    }
+
+    public void addMistake(int index) {
+        mistypedPositions.add(index);
+    }
+
+    public boolean isMistyped(int index) {
+        return mistypedPositions.contains(index);
     }
 
     /**

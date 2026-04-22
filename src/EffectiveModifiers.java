@@ -43,7 +43,7 @@ public class EffectiveModifiers {
     private static void setSlideBackMultipliers() {
         slideBackMult.put("AUTOCORRECT", 0.5);
 
-        slideBackMult.put("HUNT_AND_PECK", 2.0); // since +1 → effectively worse
+        slideBackMult.put("HUNT_AND_PECK", 2.0);
         slideBackMult.put("TOUCH_TYPIST", 0.5);
 
         slideBackMult.put("MEMBRANE", 2.0);
@@ -52,7 +52,7 @@ public class EffectiveModifiers {
 
     private static HashMap<String, Integer> burnoutAdd = new HashMap<>();
     private static void setBurnoutModifiers() {
-        burnoutAdd.put("TOUCH_TYPIST", 1);
+        burnoutAdd.put("TOUCH_TYPIST", 4);
         burnoutAdd.put("VOICE_TO_TEXT", -1);
 
         burnoutAdd.put("STENOGRAPHY", -1);

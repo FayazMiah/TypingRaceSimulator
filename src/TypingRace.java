@@ -1,73 +1,50 @@
-import java.awt.*;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.ArrayList;
+import java.util.*;
+import javax.swing.Timer;
 
-public class TypingRace
-{
+public class TypingRace {
+
     private Passage passage;
     private int passageLength;
     private ArrayList<Typist> typists;
 
-    // game tuning
     private static final double MISTYPE_BASE_CHANCE = 0.2;
     private static final int SLIDE_BACK_AMOUNT = 2;
     private static final int BURNOUT_DURATION = 3;
-    private boolean autocorrect = false;
-    private boolean caffeine = false;
-    private boolean nightShift = false;
-    public static ArrayList<HashMap<Typist, HashMap<String, Double>>> globalRaceData = new ArrayList<>();
 
+    private boolean autocorrect;
+    private boolean caffeine;
+    private boolean nightShift;
+
+    public static ArrayList<HashMap<Typist, HashMap<String, Double>>> globalRaceData = new ArrayList<>();
+    private HashMap<Typist, HashMap<String, Double>> raceData = new HashMap<>();
     private static HashMap<Typist, Double> bestWPMs = new HashMap<>();
+
+    public String gameState = "RUNNING";
 
     private long startUnixTime;
 
+    private Timer gameTimer;
 
-    public TypingRace(Passage passage, boolean autocorrect, boolean caffeiene, boolean nightShift)
-    {
+    public TypingRace(Passage passage, boolean autocorrect, boolean caffeine, boolean nightShift) {
         this.passage = passage;
         this.passageLength = passage.getLength();
 
         this.autocorrect = autocorrect;
-        this.caffeine = caffeiene;
+        this.caffeine = caffeine;
         this.nightShift = nightShift;
 
-        typists = new ArrayList<>();
+        this.typists = new ArrayList<>();
     }
 
-    public static void main(String[] args) {
-        TypingRace race = new TypingRace(PassageController.createPassage("short"), false, false, false);
-        race.addTypist(new Typist('①', "TURBOFINGERS", 0.85, "TOUCH_TYPIST", "STENOGRAPHY", new Color(255, 0, 255), new String[]{"ENERGYDRINK"}));
-        race.addTypist(new Typist('②', "QWERTY_QUEEN",  0.60, "TOUCH_TYPIST", "MEMBRANE", new Color(0, 255, 255),new String[]{"WRISTSUPPORT"}));
-        race.addTypist(new Typist('③', "HUNT_N_PECK",   0.30, "HUNT_AND_PECK", "MECHANICAL", new Color(255, 255, 0), new String[]{"NCHEADPHONES"}));
-        race.startRace();
+    public void addTypist(Typist t) {
+        if (typists.size() >= 6) return;
+        typists.add(t);
     }
 
-    // adds a typist max of 6)
-    public void addTypist(Typist theTypist)
-    {
-        if (typists.size() >= 6)
-        {
-            System.out.println("Cannot add more than 6 typists.");
-            return;
-        }
-        typists.add(theTypist);
-    }
+    //start race (gui orientated)
+    public void startRace(RaceRenderer renderer) {
 
-    //starts the race, only when there is atleast 2 players
-    public void startRace()
-    {
         this.startUnixTime = System.currentTimeMillis();
-        HashMap<Typist, HashMap<String, Double>> raceData = new HashMap<>();
-
-
-        if (typists.size() < 2) {
-            System.out.println("Need at least 2 typists to start the race.");
-            return;
-        }
-
-        boolean finished = false;
-        Typist winner = null;
 
         // reset all typists and check for existing pb
         for (Typist t : typists) {
@@ -75,171 +52,146 @@ public class TypingRace
 
             Double wpm = bestWPMs.get(t);
             if (wpm == null) {
-                bestWPMs.put(t, 0.0);
+                bestWPMs.put(t, 0.0); //may not be needed (delete if so)
             }
 
         }
 
-        while (!finished) {
-            // advance each typist
+        // game loop (without yieldign)
+        gameTimer = new Timer(120, e -> {
+
+            if (gameState.equals("FINISHED") || gameTimer == null) {
+                return;
+            }
+
+            // advance typists
             for (Typist t : typists) {
                 advanceTypist(t);
             }
+            Typist winner = null;
 
-            // print race state
-            printRace();
-
-            // check winner
             for (Typist t : typists) {
                 if (raceFinishedBy(t)) {
                     winner = t;
-                    finished = true;
+                    this.gameState = "FINISHED";
+                    gameTimer.stop();
+                    renderer.renderResults(this, typists, winner);
+                    //System.out.println("FINISHED RACEsadadsf");
                     break;
                 }
             }
 
-            // delay
-            try {
-                TimeUnit.MILLISECONDS.sleep(200);
-            } catch (Exception e) {}
-        }
+            // render ui
+            if (this.gameState.equals("RUNNING")) {
+                renderer.render(this, typists, passage);
+            }
 
-        // print the winner
-        if (winner != null) {
-            System.out.println("And the winner is ... " + winner.getName());
+            /*
+            if (winner != null) {
+                gameTimer.stop();
+                return;
+                //System.out.println("Winner: " + winner.getName());
+            }*/
 
-            double oldAcc = winner.getAccuracy();
-            winner.setAccuracy(oldAcc + 0.02);
+            for (Typist t : typists) { // put racedata of each typist into the TypingRace instance racedata
+                HashMap<String, Double> data = PerformanceMetrics.createRaceData(t, typists);
+                raceData.put(t, data);
+            }
+            globalRaceData.add(raceData); //also put it in the class to store over all races played.
+        });
 
-            System.out.println("Final Accuracy: " + winner.getAccuracy() + " (Improved from " + oldAcc + ")");
-            System.out.println("Advance Accuracy %: " + PerformanceMetrics.getAccuracyPercentage(winner));
-        }
-
-        for (Typist t : typists) {
-            HashMap<String, Double> data = PerformanceMetrics.createRaceData(t, typists);
-            raceData.put(t, data);
-        }
-        globalRaceData.add(raceData);
-
-        System.out.println(raceData);
-
+        //System.out.println("starting gametimer");
+        gameTimer.start();
     }
 
-    //advance a given argument typist
-    private void advanceTypist(Typist theTypist) {
+    // attempt to progress typist
+    private void advanceTypist(Typist t) {
 
-        double effectiveAccuracy = EffectiveModifiers.calculateEffectiveAccuracy(theTypist, this.caffeine, this.nightShift, this.passageLength);
-        double effectiveMistypeChance = EffectiveModifiers.calculateEffectiveMistypeChance(theTypist);
-        double effectiveSlideBackMult = EffectiveModifiers.calculateEffectiveSlideBackMult(theTypist, this.autocorrect);
-        int extendedBurnoutDuration = EffectiveModifiers.calculateExtendedBurnoutDuration(theTypist);
+        double effectiveAccuracy = EffectiveModifiers.calculateEffectiveAccuracy(t, caffeine, nightShift, passageLength);
+        double effectiveMistypeChance = EffectiveModifiers.calculateEffectiveMistypeChance(t);
+        double effectiveSlideBackMult = EffectiveModifiers.calculateEffectiveSlideBackMult(t, autocorrect);
+        int extendedBurnoutDuration = EffectiveModifiers.calculateExtendedBurnoutDuration(t);
 
-        theTypist.effectiveAccuracy = effectiveAccuracy;
+        t.effectiveAccuracy = effectiveAccuracy; //needed to prevent altering the typist attribute accuracy to keep it protected
 
-        if (theTypist.isBurntOut()) {
-            theTypist.recoverFromBurnout();
+        if (t.isBurntOut()) {
+            t.recoverFromBurnout();
             return;
         }
 
-        // successful typing
+        // advance progress
         if (Math.random() < effectiveAccuracy) {
-            theTypist.typeCharacter();
+            t.typeCharacter();
         }
-        // mistype
-        else if (Math.random() < (1 - effectiveAccuracy) * MISTYPE_BASE_CHANCE * effectiveMistypeChance) {
-            theTypist.slideBack((int) Math.round(SLIDE_BACK_AMOUNT * effectiveSlideBackMult));
+        else if (Math.random() < (1 - effectiveAccuracy) * MISTYPE_BASE_CHANCE * effectiveMistypeChance) { // mistype
+
+            //mark positions of mistypes in the hashset
+            int pos = t.getProgress();
+            t.addMistake(pos);
+            t.slideBack((int) Math.round(SLIDE_BACK_AMOUNT * effectiveSlideBackMult));
         }
 
         // burnout
         if (Math.random() < 0.05 * effectiveAccuracy * effectiveAccuracy) {
-            theTypist.burnOut(BURNOUT_DURATION + extendedBurnoutDuration);
+            t.burnOut(BURNOUT_DURATION + extendedBurnoutDuration);
         }
 
-        if (theTypist.getProgress() > 2) {
-            Double currentwpm = PerformanceMetrics.getWPM(theTypist, this.startUnixTime);
-            Double highestwpm = bestWPMs.get(theTypist);
-            double raceHighestwpm = theTypist.getRaceBestWPM();
+        if (t.getProgress() > 2) {
+            Double currentwpm = PerformanceMetrics.getWPM(t, this.startUnixTime);
+            Double highestwpm = bestWPMs.get(t);
+            double raceHighestwpm = t.getRaceBestWPM();
             if (highestwpm == null || currentwpm > highestwpm) {
-                bestWPMs.put(theTypist, currentwpm);
+                bestWPMs.put(t, currentwpm);
             }
             if (currentwpm > raceHighestwpm) {
-                theTypist.setRaceBestWPM(currentwpm);
+                t.setRaceBestWPM(currentwpm);
             }
-
-
-
             //System.out.println("CURRENT HIGH:: " + highestwpm + "CURRENT: " + currentwpm);
         }
 
 
-
+        //setRaceBestWPM(double wpm)
     }
 
-    //check for win
-    private boolean raceFinishedBy(Typist theTypist) {
-        return theTypist.getProgress() >= passageLength;
+    private boolean raceFinishedBy(Typist t) {
+        return t.getProgress() >= passageLength;
     }
 
-    // print race current state
-    private void printRace() {
-        System.out.print('\u000C'); // Clear screen
+    // getters for UI
+    public ArrayList<Typist> getTypists() {
+        return typists;
+    }
 
-        System.out.println("  TYPING RACE — passage length: " + passageLength + " chars");
-        multiplePrint('=', passageLength + 3);
-        System.out.println();
+    public Passage getPassage() {
+        return passage;
+    }
+
+    // other getters
+
+    public long getStartTime() {
+        return this.startUnixTime;
+    }
+
+    public HashMap<Typist, HashMap<String, Double>> getRaceData () {
+        return this.raceData;
+    }
+    public void resetRace() {
+        if (gameTimer != null) {
+            gameTimer.stop();
+            gameTimer = null;
+        }
+        this.gameState = "RUNNING";
+        this.startUnixTime = 0;
+        this.raceData.clear();
 
         for (Typist t : typists) {
-            printSeat(t);
-            System.out.println();
+            t.resetToStart();
+            t.setRaceBestWPM(0);
+            if (!bestWPMs.containsKey(t)) {
+                bestWPMs.put(t, 0.0);
+            }
         }
 
-        multiplePrint('=', passageLength + 3);
-        System.out.println();
-        System.out.println("  [zz] = burnt out    [<] = just mistyped");
     }
 
-    //print state of single typist
-    private void printSeat(Typist theTypist)
-    {
-        if (theTypist == null) return;
-
-        int progress = theTypist.getProgress();
-        int spacesBefore = progress;
-        int spacesAfter = Math.max(0, passageLength - progress);
-
-        System.out.print('|');
-        multiplePrint(' ', spacesBefore);
-
-        System.out.print(theTypist.getSymbol());
-
-        if (theTypist.isBurntOut()) {
-            System.out.print("[zz]");
-            spacesAfter -= 4;
-        }
-        else if (theTypist.getMistyped()) {
-            System.out.print("<");
-            theTypist.setMistyped(false);
-            spacesAfter -= 1;
-        }
-
-        multiplePrint(' ', Math.max(0, spacesAfter));
-        System.out.print('|');
-
-        // info display
-        if (theTypist.isBurntOut())
-        {
-            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.effectiveAccuracy + ")" + " BURNT OUT (" + theTypist.getBurnoutTurnsRemaining() + " turns)");
-        }
-        else
-        {
-            System.out.print(theTypist.getName() + " (Accuracy: " + theTypist.effectiveAccuracy + ")");
-        }
-    }
-
-    private void multiplePrint(char aChar, int times)
-    {
-        for (int i = 0; i < times; i++)
-        {
-            System.out.print(aChar);
-        }
-    }
 }

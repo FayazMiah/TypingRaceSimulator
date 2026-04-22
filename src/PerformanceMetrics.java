@@ -26,13 +26,13 @@ public class PerformanceMetrics {
         return p;
     }
 
-    public static int getBurnOutTurns(Typist typist) {
-        return typist.getBurntOutTurns();
+    public static int getBurnoutCount(Typist typist) {
+        return typist.getBurnoutCount();
     }
 
 
     public static int determinePosition(Typist typist, ArrayList<Typist> typists) {
-
+        //
         int position = 1;
         for (Typist other : typists) {
             if (other.getProgress() > typist.getProgress()) {
@@ -45,13 +45,13 @@ public class PerformanceMetrics {
     public static HashMap<String, Double> createRaceData(Typist typist, ArrayList<Typist> typists) {
         //highestWPM refers to that independant race only, not their highest over all races
         Double highestWPM = typist.getRaceBestWPM();
-        Double burnoutTurns = (double) getBurnOutTurns(typist);
+        Double burnoutCount = (double) getBurnoutCount(typist);
         Double accPercent = (double) getAccuracyPercentage(typist);
         Double position = (double) determinePosition(typist, typists);
         HashMap<String, Double> data = new HashMap<>();
         data.put("WPMReached", highestWPM);
         data.put("PositionPlaced", position);
-        data.put("BurnoutTurns", burnoutTurns);
+        data.put("BurnoutCount", burnoutCount);
         data.put("AdvanceAccuracy", accPercent);
         return data;
     }

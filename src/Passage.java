@@ -12,4 +12,4 @@ public class Passage {
     public int getLength() {
         return text.length();
     }
-}
+}//
