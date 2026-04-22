@@ -9,12 +9,12 @@ public class PassageController {
     };
 
     private static String[] mediumPassages = {
-            "Typing races are a fun way to test your speed and accuracy over time",
-            "Consistency and focus are more important than raw typing speed in the long run"
+            "This is a fun and medium length sentence that this robot simulation is currently pretending to write.",
+            "I love OOP and making typing simulators they are so fun and enjoyable as they induce challening problem solving."
     };
 
     private static String[] longPassages = {
-            "In a world driven by constant distraction, the ability to focus deeply has become a rare and valuable skill..."
+            "This is a very long passage that should take a while to complete and is roughly 140 characters by estimation as I am typing this sentence, Hello World Hello World."
     };
 
     public static Passage createPassage(String type) {

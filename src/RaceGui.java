@@ -1,5 +1,8 @@
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RaceGui {
 
@@ -35,13 +38,16 @@ public class RaceGui {
         //button event action listeners
 
         configureButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Configure clicked");
+            //if (TypingRace.getTypists().size() < 6) {
+            ConfigurationPanel.configureRaceScreen(this);
+            //}
         });
 
         startButton.addActionListener(e -> startRaceScreen());
 
         analyticsButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Analytics clicked");
+            //JOptionPane.showMessageDialog(frame, "Analytics clicked");
+            AnalyticsPanel.viewAnalyticsScreen(this);
         });
 
         buttonPanel.add(configureButton);
@@ -56,8 +62,14 @@ public class RaceGui {
         frame.setVisible(true);
     }
 
+
     //race screening
     private void startRaceScreen() {
+
+        if (TypingRace.getTypists().size() < 2) {
+            System.out.println("Not Enough People");
+            return;
+        }
 
        // System.out.println("craeting race screee n");
         race = null;
@@ -80,10 +92,25 @@ public class RaceGui {
 
         renderer = new RaceRenderer(this, passagePane);
 
-        Passage p = PassageController.createPassage("short");
-        race = new TypingRace(p, false, false, false);
+        //Passage p = PassageController.createPassage("short");
 
-        race.addTypist(new Typist(
+        Passage p;
+
+        if (ConfigurationPanel.getSelectedPassageType().equals("CUSTOM")) {
+            p = PassageController.createPassage("custom", "this is a custom test passage to change afterwards");
+        }
+        else {
+            p = PassageController.createPassage(ConfigurationPanel.getSelectedPassageType().toLowerCase());
+        }
+
+        race = new TypingRace(
+                p,
+                ConfigurationPanel.selectedAutocorrect,
+                ConfigurationPanel.selectedCaffeine,
+                ConfigurationPanel.selectedNightShift
+        );
+
+        /*TypingRace.addTypist(new Typist(
                 '①',
                 "TURBOFINGERS",
                 0.85,
@@ -93,18 +120,20 @@ public class RaceGui {
                 new String[]{"ENERGYDRINK"})
         );
 
-        race.addTypist(new Typist('②',
+        TypingRace.addTypist(new Typist('②',
                 "QWERTY_QUEEN",
                 0.60,
                 "TOUCH_TYPIST",
                 "MEMBRANE",
                 new Color(0, 255, 255),
                 new String[]{"WRISTSUPPORT"})
-        );
+        );*/
 
         // start timer after ui is put in
         race.startRace(renderer);
     }
+
+
 
     //toggle menu visiblity
     public void showMenuScreen() {
@@ -113,12 +142,11 @@ public class RaceGui {
         frame.repaint();
     }
 
-    public JFrame getFrame() {
-        return this.frame;
+    public JFrame getFrame() {return this.frame;
     }
 
     //button styling
-    private JButton createStyledButton(String text) {
+    public JButton createStyledButton(String text) {
 
         JButton button = new JButton(text);
 

@@ -5,7 +5,7 @@ public class TypingRace {
 
     private Passage passage;
     private int passageLength;
-    private ArrayList<Typist> typists;
+    private static ArrayList<Typist> typists = new ArrayList<>();
 
     private static final double MISTYPE_BASE_CHANCE = 0.2;
     private static final int SLIDE_BACK_AMOUNT = 2;
@@ -33,13 +33,9 @@ public class TypingRace {
         this.caffeine = caffeine;
         this.nightShift = nightShift;
 
-        this.typists = new ArrayList<>();
+        //this.typists = new ArrayList<>();
     }
 
-    public void addTypist(Typist t) {
-        if (typists.size() >= 6) return;
-        typists.add(t);
-    }
 
     //start race (gui orientated)
     public void startRace(RaceRenderer renderer) {
@@ -75,6 +71,9 @@ public class TypingRace {
                     winner = t;
                     this.gameState = "FINISHED";
                     gameTimer.stop();
+                    saveRaceData();
+
+                    globalRaceData.add(raceData); //also put it in the class to store over all races played.
                     renderer.renderResults(this, typists, winner);
                     //System.out.println("FINISHED RACEsadadsf");
                     break;
@@ -92,14 +91,7 @@ public class TypingRace {
                 return;
                 //System.out.println("Winner: " + winner.getName());
             }*/
-
-            for (Typist t : typists) { // put racedata of each typist into the TypingRace instance racedata
-                HashMap<String, Double> data = PerformanceMetrics.createRaceData(t, typists);
-                raceData.put(t, data);
-            }
-            globalRaceData.add(raceData); //also put it in the class to store over all races played.
         });
-
         //System.out.println("starting gametimer");
         gameTimer.start();
     }
@@ -158,8 +150,13 @@ public class TypingRace {
     }
 
     // getters for UI
-    public ArrayList<Typist> getTypists() {
+    public static ArrayList<Typist> getTypists() {
         return typists;
+    }
+
+    public static void addTypist(Typist t) {
+        if (typists.size() >= 6) return;
+        typists.add(t);
     }
 
     public Passage getPassage() {
@@ -175,6 +172,14 @@ public class TypingRace {
     public HashMap<Typist, HashMap<String, Double>> getRaceData () {
         return this.raceData;
     }
+
+    public void saveRaceData() {
+        for (Typist t : typists) { // put racedata of each typist into the TypingRace instance racedata
+            HashMap<String, Double> data = PerformanceMetrics.createRaceData(t, typists);
+            raceData.put(t, data);
+        }
+        //System.out.println("race data: " + raceData);
+    }
     public void resetRace() {
         if (gameTimer != null) {
             gameTimer.stop();
@@ -182,7 +187,7 @@ public class TypingRace {
         }
         this.gameState = "RUNNING";
         this.startUnixTime = 0;
-        this.raceData.clear();
+        //this.raceData.clear();
 
         for (Typist t : typists) {
             t.resetToStart();

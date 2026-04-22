@@ -9,7 +9,7 @@ import java.util.HashSet;
  * He left a sticky note: "the slide-back thing is optional probably".
  * It is not optional. Good luck.
  *
- * @author (your name)
+ * @author Fayaz Miah
  * @version (a version number or a date)
  */
 

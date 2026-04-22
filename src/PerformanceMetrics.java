@@ -44,15 +44,26 @@ public class PerformanceMetrics {
 
     public static HashMap<String, Double> createRaceData(Typist typist, ArrayList<Typist> typists) {
         //highestWPM refers to that independant race only, not their highest over all races
+
         Double highestWPM = typist.getRaceBestWPM();
         Double burnoutCount = (double) getBurnoutCount(typist);
         Double accPercent = (double) getAccuracyPercentage(typist);
         Double position = (double) determinePosition(typist, typists);
+        Double mistypes = (double) typist.getNumberOfMistypes();
+        Double progress = (double) typist.getProgress();
+        Double baseAccuracy = typist.getAccuracy();
+
         HashMap<String, Double> data = new HashMap<>();
+
         data.put("WPMReached", highestWPM);
         data.put("PositionPlaced", position);
         data.put("BurnoutCount", burnoutCount);
         data.put("AdvanceAccuracy", accPercent);
+        data.put("MistypeCount", mistypes);
+        data.put("FinalProgress", progress);
+        data.put("BaseAccuracy", baseAccuracy);
+
+
         return data;
     }
 }
