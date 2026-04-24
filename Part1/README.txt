@@ -1,0 +1,1 @@
+The TypingRace class here is a simple text interface orientated class abstracting unnecessary attributes such as colour and many others.
