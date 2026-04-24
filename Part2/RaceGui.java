@@ -43,7 +43,7 @@ public class RaceGui {
             //}
         });
 
-        startButton.addActionListener(e -> startRaceScreen());
+        startButton.addActionListener(e -> startRaceGUI());
 
         analyticsButton.addActionListener(e -> {
             //JOptionPane.showMessageDialog(frame, "Analytics clicked");
@@ -64,7 +64,7 @@ public class RaceGui {
 
 
     //race screening
-    private void startRaceScreen() {
+    private void startRaceGUI() {
 
         if (TypingRace.getTypists().size() < 2) {
             System.out.println("Not Enough People");
