@@ -51,6 +51,9 @@ public class PerformanceMetrics {
         Double position = (double) determinePosition(typist, typists);
         Double mistypes = (double) typist.getNumberOfMistypes();
         Double progress = (double) typist.getProgress();
+        int positionInt = PerformanceMetrics.determinePosition(typist, typists);
+        int pointsInt = typists.size() - positionInt;
+        Double pointsAchieved = (double) typist.getPoints();
         Double baseAccuracy = typist.getAccuracy();
 
         HashMap<String, Double> data = new HashMap<>();
@@ -62,6 +65,7 @@ public class PerformanceMetrics {
         data.put("MistypeCount", mistypes);
         data.put("FinalProgress", progress);
         data.put("BaseAccuracy", baseAccuracy);
+        data.put("PointsAchieved", pointsAchieved);
 
 
         return data;

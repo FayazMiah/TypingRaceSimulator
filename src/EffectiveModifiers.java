@@ -147,7 +147,7 @@ public class EffectiveModifiers {
 
         String[] accessories = theTypist.getAccessories();
         for (String accesory : accessories) {
-            if (accesory.equals("NCHEADHPHONES")) {
+            if (accesory.equals("NCHEADPHONES")) {
                 effectiveMistypeChance *= mistypeMult.get("NCHEADPHONES");
             }
         }

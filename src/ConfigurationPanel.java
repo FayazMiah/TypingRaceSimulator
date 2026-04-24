@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ConfigurationPanel {
 
@@ -61,18 +62,21 @@ public class ConfigurationPanel {
         JButton passageButton = gui.createStyledButton("Passage Length");
         JButton backButton = gui.createStyledButton("Back");
         JButton viewTypistsButton = gui.createStyledButton("View Typists");
+        JButton leaderboardButton = gui.createStyledButton("Leaderboard");
 
         createTypistButton.addActionListener(e -> createTypistScreen(gui));
         modifiersButton.addActionListener(e -> gameModifierScreen(gui));
         passageButton.addActionListener(e -> passageLengthScreen(gui));
         backButton.addActionListener(e -> gui.showMenuScreen());
         viewTypistsButton.addActionListener(e -> viewTypistsScreen(gui));
+        leaderboardButton.addActionListener(e -> viewLeaderboardScreen(gui));
 
         configPanel.add(createTypistButton);
         configPanel.add(modifiersButton);
         configPanel.add(passageButton);
-        configPanel.add(backButton);
         configPanel.add(viewTypistsButton);
+        configPanel.add(leaderboardButton);
+        configPanel.add(backButton);
 
         gui.getFrame().setContentPane(configPanel);
         gui.getFrame().revalidate();
@@ -278,11 +282,12 @@ public class ConfigurationPanel {
                 StyleConstants.setForeground(style, t.getColour());
                 StyleConstants.setBold(style, true);
 
-                doc.insertString(doc.getLength(), t.getName() + "\n", style);
+                doc.insertString(doc.getLength(), t.getTitle() + "\n", style);
 
                 doc.insertString(
                         doc.getLength(),
-                    "Symbol: " + t.getSymbol() + "\n" +
+                        "Points: " + t.getPoints() + "\n" +
+                        "Symbol: " + t.getSymbol() + "\n" +
                         "Accuracy: " + t.getAccuracy() + "\n" +
                         "Style: " + t.getStyle() + "\n" +
                         "Keyboard: " + t.getKeyboardType() + "\n" +
@@ -309,5 +314,62 @@ public class ConfigurationPanel {
         gui.getFrame().repaint();
     }
 
+    private static void viewLeaderboardScreen(RaceGui gui) {
+        JPanel analyticsPanel = new JPanel(new BorderLayout());
+        analyticsPanel.setBackground(Theme.Dark);
+
+        JTextPane analyticsPane = new JTextPane();
+        analyticsPane.setEditable(false);
+        analyticsPane.setFont(new Font("Monospaced", Font.PLAIN, 16));
+        analyticsPane.setBackground(Theme.Dark);
+        analyticsPane.setForeground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(analyticsPane);
+        scrollPane.setPreferredSize(new Dimension(720, 500));
+
+        StyledDocument doc = analyticsPane.getStyledDocument();
+
+        try {
+            doc.insertString(doc.getLength(), "=== POINTS LEADERBOARD ===\n\n", null);
+
+            if (TypingRace.getTypists().size() == 0) {
+                doc.insertString(doc.getLength(), "No statistics available.\n", null);
+            }
+
+            ArrayList<Typist> typists = TypingRace.getTypists();
+            ArrayList<Typist> sortedTypists = new ArrayList<>(typists);
+            sortedTypists.sort((a, b) -> b.getPoints() - a.getPoints()); // sort high to low
+
+            int position = 1;
+
+            for (Typist t : sortedTypists) {
+                SimpleAttributeSet style = new SimpleAttributeSet();
+                StyleConstants.setForeground(style, t.getColour());
+                StyleConstants.setBold(style, true);
+                doc.insertString(doc.getLength(), position + ". " + t.getTitle() + "\n", style);
+                doc.insertString(doc.getLength(), "Points: " + t.getPoints() + "\n\n", null);
+                position++;
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JButton backButton = new JButton("Return to Menu");
+        backButton.setBackground(Theme.Light);
+        backButton.setForeground(Color.WHITE);
+        backButton.setFont(new Font("Arial", Font.BOLD, 16));
+        backButton.setFocusPainted(false);
+
+        backButton.addActionListener(e -> gui.showMenuScreen());
+
+        analyticsPanel.add(scrollPane, BorderLayout.CENTER);
+        analyticsPanel.add(backButton, BorderLayout.SOUTH);
+
+        gui.getFrame().setContentPane(analyticsPanel);
+        gui.getFrame().revalidate();
+        gui.getFrame().repaint();
+    }
 
 }

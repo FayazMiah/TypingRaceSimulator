@@ -136,22 +136,28 @@ public class RaceRenderer {
 
                 HashMap<String, Double> data = raceData.get(t);
 
+
+
                 int pos = data.get("PositionPlaced").intValue();
+                int pointsInt = typists.size() - pos;
+
                 doc.insertString(doc.getLength(), t.getName() + "\n", nameStyle);
                 doc.insertString(doc.getLength(), "Progress: " + t.getProgress() + " characters\n", null);
+                if (pos == 1) {
+                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "st\n", null);
+                } else if (pos == 2) {
+                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "nd\n", null);
+                } else if (pos == 3) {
+                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "rd\n", null);
+                } else {
+                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "th\n", null);
+                }
+                doc.insertString(doc.getLength(), "Points Receieved: " + pointsInt + "\n", null);
                 doc.insertString(doc.getLength(), "Advance Accuracy (%): " + data.get("AdvanceAccuracy") + "%\n", null);
                 doc.insertString(doc.getLength(), "Racer Probabilistic Accuracy: " + t.getAccuracy() + "\n", null);
                 doc.insertString(doc.getLength(), "Burnout Count: " + data.get("BurnoutCount") + "\n", null);
-                doc.insertString(doc.getLength(), "Highest WPM Reached: " + Math.round(data.get("WPMReached")) + "\n", null);
-                if (pos == 1) {
-                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "st\n\n", null);
-                } else if (pos == 2) {
-                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "nd\n\n", null);
-                } else if (pos == 3) {
-                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "rd\n\n", null);
-                } else {
-                    doc.insertString(doc.getLength(), "Position Placed: " + pos + "th\n\n", null);
-                }
+                doc.insertString(doc.getLength(), "Highest WPM Reached: " + Math.round(data.get("WPMReached")) + "\n\n", null);
+
 
             }
 

@@ -34,13 +34,15 @@ public class AnalyticsPanel {
                 doc.insertString(doc.getLength(), "RACE #" + raceNum + "\n\n", null);
                 for (Typist t : race.keySet()) {
                     HashMap<String, Double> data = race.get(t);
-                    doc.insertString(doc.getLength(), t.getName() + "\n", null);
+                    doc.insertString(doc.getLength(), t.getTitle() + "\n", null);
                     doc.insertString(doc.getLength(), "Position: " + data.get("PositionPlaced").intValue() + "\n", null);
                     doc.insertString(doc.getLength(), "Highest WPM: " + Math.round(data.get("WPMReached")) + "\n", null);
                     doc.insertString(doc.getLength(), "Advance Accuracy: " + data.get("AdvanceAccuracy") + "%\n", null);
                     doc.insertString(doc.getLength(), "Burnout Count: " + data.get("BurnoutCount").intValue() + "\n", null);
                     doc.insertString(doc.getLength(), "Mistype Count: " + data.get("MistypeCount").intValue() + "\n", null);
                     doc.insertString(doc.getLength(), "Final Progress: " + data.get("FinalProgress").intValue() + "\n", null);
+                    doc.insertString(doc.getLength(), "Points from Race: " + data.get("PointsAchieved") + "\n", null);
+                    doc.insertString(doc.getLength(), "Winstreak: " + t.getWinstreak() + "\n", null);
                     doc.insertString(doc.getLength(), "Base Accuracy: " + data.get("BaseAccuracy") + "\n\n", null);
                 }
                 doc.insertString(doc.getLength(), "----------------------------\n\n", null);

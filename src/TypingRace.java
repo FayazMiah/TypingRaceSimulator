@@ -71,7 +71,9 @@ public class TypingRace {
                     winner = t;
                     this.gameState = "FINISHED";
                     gameTimer.stop();
+                    distributePoints();
                     saveRaceData();
+                    adjustWinstreaks(winner);
 
                     globalRaceData.add(raceData); //also put it in the class to store over all races played.
                     renderer.renderResults(this, typists, winner);
@@ -197,6 +199,24 @@ public class TypingRace {
             }
         }
 
+    }
+
+    public void distributePoints() {
+        for (Typist typist : typists) {
+            int position = PerformanceMetrics.determinePosition(typist, typists);
+            int points = typists.size() - position;
+            typist.addPoints(points);
+        }
+    }
+
+    public void adjustWinstreaks(Typist winner) {
+        for (Typist t : typists) {
+            if (t == winner) {
+                t.adjustWinstreak(true);
+            } else {
+                t.adjustWinstreak(false);
+            }
+        }
     }
 
 }

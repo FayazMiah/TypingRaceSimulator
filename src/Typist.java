@@ -18,6 +18,7 @@ public class Typist {
     // Hint: you will need six fields. Think carefully about their types.
 
     private String typistName;
+    private String rank = "Beginner";
     private char typistSymbol;
     private int progress;
     private boolean burntOut;
@@ -33,6 +34,9 @@ public class Typist {
     private int numberOfProgressions = 0;
     private int burnoutCount = 0;
     private double raceBestWPM = 0;
+    private int winstreak = 0;
+
+    private int points = 0;
 
     private HashSet<Integer> mistypedPositions = new HashSet<>();
 
@@ -293,4 +297,65 @@ public class Typist {
         this.typistSymbol = newSymbol;
     }
 
+    public int getPoints() {
+        return this.points;
+    }
+
+    public void addPoints(int points) {
+        this.points += points;
+        if (this.points >= 15) {
+            this.rank = "Speed Daemon";
+        } else if (this.points >= 10) {
+            this.rank = "Keyboard Warrior";
+        } else if (this.points >= 8) {
+            this.rank = "Rapid Typer";
+        } else if (this.points >= 5) {
+            this.rank = "Touch Typist";
+        } else if (this.points >= 3) {
+            this.rank = "Fast Fingers";
+        } else {
+            this.rank = "Rookie Racer";
+        }
+    }
+
+    private String toRoman(int num) {
+
+        if (num > 10) {
+            return "MASTER";
+        }
+
+        switch(num) {
+            case 1: return "I";
+            case 2: return "II";
+            case 3: return "III";
+            case 4: return "IV";
+            case 5: return "V";
+            case 6: return "VI";
+            case 7: return "VII";
+            case 8: return "VIII";
+            case 9: return "IX";
+            case 10: return "X";
+            default: return "";
+        }
+    }
+
+    public void adjustWinstreak(boolean win) {
+        if (win) {
+            this.winstreak++;
+        } else {
+            this.winstreak = 0;
+        }
+    }
+
+    public String getTitle() {
+        if (this.winstreak > 0) {
+            return this.typistName + ": " + this.rank + " (" + toRoman(this.winstreak) + ")";
+        } else {
+            return this.typistName + ": " + this.rank;
+        }
+    }
+
+    public int getWinstreak() {
+        return this.winstreak;
+    }
 }
